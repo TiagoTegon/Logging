@@ -7,8 +7,12 @@ class Program
     {
         Logging logging = Logging.Instance;
 
-        logging.Log("This is an initial log message");
-        logging.Log("This is a second log message");
+        logging.Log("This is a notset log message");
+        logging.Debug("This is a debug log message");
+        logging.Info("This is an info log message");
+        logging.Warning("This is a warning log message");
+        logging.Error("This is an error log message");
+        logging.Critical("This is a critical log message");
 
         // Simulate additional work
         for (int i = 0; i < 5; i++)

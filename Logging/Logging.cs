@@ -3,6 +3,16 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
+public enum LogLevel
+{
+    NOTSET,
+    DEBUG,
+    INFO,
+    WARNING,
+    ERROR,
+    CRITICAL
+}
+
 public class Logging
 {
     private static Logging? instance;
@@ -33,9 +43,34 @@ public class Logging
         }
     }
 
-    public void Log(string message)
+    public void Log(string message, LogLevel level = LogLevel.NOTSET)
     {
-        logQueue.Enqueue(new LogEntry(message));
+        logQueue.Enqueue(new LogEntry(message, level));
+    }
+
+    public void Debug(string message)
+    {
+        Log(message, LogLevel.DEBUG);
+    }
+
+    public void Info(string message)
+    {
+        Log(message, LogLevel.INFO);
+    }
+
+    public void Warning(string message)
+    {
+        Log(message, LogLevel.WARNING);
+    }
+
+    public void Error(string message)
+    {
+        Log(message, LogLevel.ERROR);
+    }
+
+    public void Critical(string message)
+    {
+        Log(message, LogLevel.CRITICAL);
     }
 
     public void Shutdown()
@@ -47,10 +82,12 @@ public class Logging
     private class LogEntry
     {
         public string Message { get; }
+        public LogLevel Level { get; }
 
-        public LogEntry(string message)
+        public LogEntry(string message, LogLevel level)
         {
             Message = message;
+            Level = level;
         }
     }
 
@@ -73,7 +110,7 @@ public class Logging
     private static string FormatLogMessage(LogEntry logEntry)
     {
         string timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
-        return $"[{timestamp}] {logEntry.Message}";
+        return $"[{timestamp}] [{logEntry.Level}] {logEntry.Message}";
     }
 
     private static void WriteLogMessage(string logMessage)
