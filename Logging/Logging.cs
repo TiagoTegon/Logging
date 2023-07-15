@@ -44,21 +44,6 @@ public class Logging
         loggingTask.Wait();
     }
 
-    private async Task LogMessagesAsync()
-    {
-        while(!cancellationTokenSource.Token.IsCancellationRequested)
-        {
-            if (logQueue.TryDequeue(out var logEntry)) 
-            {
-                Console.WriteLine($"[LOG] {logEntry.Message}");
-            }
-            else
-            {
-                await Task.Delay(100);
-            }
-        }
-    }
-
     private class LogEntry
     {
         public string Message { get; }
@@ -67,5 +52,32 @@ public class Logging
         {
             Message = message;
         }
+    }
+
+    private async Task LogMessagesAsync()
+    {
+        while(!cancellationTokenSource.Token.IsCancellationRequested)
+        {
+            if (logQueue.TryDequeue(out var logEntry)) 
+            {
+                string formatedLogMessage = FormatLogMessage(logEntry);
+                WriteLogMessage(formatedLogMessage);
+            }
+            else
+            {
+                await Task.Delay(100);
+            }
+        }
+    }
+
+    private static string FormatLogMessage(LogEntry logEntry)
+    {
+        string timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
+        return $"[{timestamp}] {logEntry.Message}";
+    }
+
+    private static void WriteLogMessage(string logMessage)
+    {
+        Console.WriteLine(logMessage);
     }
 }
