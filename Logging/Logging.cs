@@ -1,6 +1,7 @@
 ﻿public class Logging
 {
     private static Logging? instance;
+    private static readonly object lockObject = new object();
 
     private Logging() { }
 
@@ -8,7 +9,13 @@
     {
         get
         {
-            instance ??= new Logging();
+            if (instance == null)
+            {
+                lock (lockObject) 
+                {
+                    instance ??= new Logging();
+                }
+            }
             return instance;
         }
     }
