@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,12 +21,14 @@ public class Logging
     private readonly ConcurrentQueue<LogEntry> logQueue;
     private readonly CancellationTokenSource cancellationTokenSource;
     private readonly Task loggingTask;
+    private readonly string logFilePath;
 
     private Logging() 
     {
         logQueue = new ConcurrentQueue<LogEntry>();
         cancellationTokenSource = new CancellationTokenSource();
         loggingTask = Task.Run(LogMessagesAsync, cancellationTokenSource.Token);
+        logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log.txt");
     }
 
     public static Logging Instance
@@ -107,14 +110,25 @@ public class Logging
         }
     }
 
-    private static string FormatLogMessage(LogEntry logEntry)
+    private string FormatLogMessage(LogEntry logEntry)
     {
         string timestamp = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss");
         return $"[{timestamp}] [{logEntry.Level}] {logEntry.Message}";
     }
 
-    private static void WriteLogMessage(string logMessage)
+    private void WriteLogMessage(string logMessage)
     {
         Console.WriteLine(logMessage);
+        try
+        {
+            using (StreamWriter writer = new StreamWriter(logFilePath, true))
+            {
+                writer.WriteLine(logMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to save log to file: {ex.Message}");
+        }
     }
 }
